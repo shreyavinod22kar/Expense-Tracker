@@ -5,6 +5,18 @@ const categoryInput = document.getElementById('expense-category');
 const expenseList = document.getElementById('expense-list');
 const totalAmount = document.getElementById('total-amount');
 
+const ctx = document.getElementById('expense-chart').getContext('2d');
+let expenseChart = new Chart(ctx, {
+  type: 'pie',
+  data: {
+    labels: [],
+    datasets: [{
+      data: [],
+      backgroundColor: ['#3b82f6', '#60a5fa', '#93c5fd', '#1d4ed8', '#2563eb']
+    }]
+  }
+});
+
 let expenses = [];
 let total = 0;
 
@@ -25,6 +37,7 @@ form.addEventListener('submit', function(event) {
   expenses.push(newExpense);
   updateTotal();
   renderExpenses();
+  updateChart();
 
   form.reset();
 });
@@ -47,8 +60,25 @@ function renderExpenses() {
   });
 }
 
+function updateChart() {
+  const categoryTotals = {};
+
+  expenses.forEach(function(expense) {
+    if (categoryTotals[expense.category]) {
+      categoryTotals[expense.category] += expense.amount;
+    } else {
+      categoryTotals[expense.category] = expense.amount;
+    }
+  });
+
+  expenseChart.data.labels = Object.keys(categoryTotals);
+  expenseChart.data.datasets[0].data = Object.values(categoryTotals);
+  expenseChart.update();
+}
+
 function deleteExpense(id) {
   expenses = expenses.filter(expense => expense.id !== id);
   updateTotal();
   renderExpenses();
+  updateChart();
 }
