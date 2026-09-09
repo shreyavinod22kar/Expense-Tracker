@@ -20,24 +20,30 @@ let expenseChart = new Chart(ctx, {
 let expenses = [];
 let total = 0;
 
-form.addEventListener('submit', function(event) {
+async function loadExpenses() {
+  const response = await fetch('http://127.0.0.1:5000/expenses');
+  expenses = await response.json();
+  renderExpenses();
+  updateTotal();
+  updateChart();
+}
+
+loadExpenses();
+
+form.addEventListener('submit', async function(event) {
   event.preventDefault();
 
   const name = nameInput.value;
   const amount = parseFloat(amountInput.value);
   const category = categoryInput.value;
 
-  const newExpense = {
-    id: Date.now(),
-    name: name,
-    amount: amount,
-    category: category
-  };
+  await fetch('http://127.0.0.1:5000/expenses', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name, amount: amount, category: category })
+  });
 
-  expenses.push(newExpense);
-  updateTotal();
-  renderExpenses();
-  updateChart();
+  await loadExpenses();
 
   form.reset();
 });
@@ -76,9 +82,10 @@ function updateChart() {
   expenseChart.update();
 }
 
-function deleteExpense(id) {
-  expenses = expenses.filter(expense => expense.id !== id);
-  updateTotal();
-  renderExpenses();
-  updateChart();
+async function deleteExpense(id) {
+  await fetch(`http://127.0.0.1:5000/expenses/${id}`, {
+    method: 'DELETE'
+  });
+
+  await loadExpenses();
 }
