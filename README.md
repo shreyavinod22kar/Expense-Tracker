@@ -27,9 +27,6 @@ A full-stack web application to track, manage, and visualize personal expenses â
 3. Flask saves the data into a SQLite database
 4. Frontend fetches and displays updated data, including a live-updating chart
 
-## Screenshots
-
-*(Add 1-2 screenshots of your app here once you have them â€” recruiters love visuals)*
 
 ## Running Locally
 
