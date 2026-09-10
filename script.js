@@ -1,3 +1,5 @@
+const API_URL = 'https://expense-tracker-jvvj.onrender.com';
+
 const form = document.getElementById('expense-form');
 const nameInput = document.getElementById('expense-name');
 const amountInput = document.getElementById('expense-amount');
@@ -21,7 +23,7 @@ let expenses = [];
 let total = 0;
 
 async function loadExpenses() {
-  const response = await fetch('http://127.0.0.1:5000/expenses');
+  const response = await fetch(`${API_URL}/expenses`);
   expenses = await response.json();
   renderExpenses();
   updateTotal();
@@ -37,7 +39,7 @@ form.addEventListener('submit', async function(event) {
   const amount = parseFloat(amountInput.value);
   const category = categoryInput.value;
 
-  await fetch('http://127.0.0.1:5000/expenses', {
+  await fetch(`${API_URL}/expenses`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: name, amount: amount, category: category })
@@ -83,7 +85,7 @@ function updateChart() {
 }
 
 async function deleteExpense(id) {
-  await fetch(`http://127.0.0.1:5000/expenses/${id}`, {
+  await fetch(`${API_URL}/expenses/${id}`, {
     method: 'DELETE'
   });
 
