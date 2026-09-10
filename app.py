@@ -1,31 +1,40 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import sqlite3
 
 app = Flask(__name__)
-CORS(app)  # allows your frontend to talk to this backend
+CORS(app)
 
-expenses = []  # temporary storage (like your JS array, but on the server)
+def get_db_connection():
+    conn = sqlite3.connect('expenses.db')
+    conn.row_factory = sqlite3.Row  # lets us access columns by name
+    return conn
 
 @app.route('/expenses', methods=['GET'])
 def get_expenses():
-    return jsonify(expenses)
+    conn = get_db_connection()
+    expenses = conn.execute('SELECT * FROM expenses').fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in expenses])
 
 @app.route('/expenses', methods=['POST'])
 def add_expense():
     data = request.get_json()
-    new_expense = {
-        'id': len(expenses) + 1,
-        'name': data['name'],
-        'amount': data['amount'],
-        'category': data['category']
-    }
-    expenses.append(new_expense)
-    return jsonify(new_expense), 201
+    conn = get_db_connection()
+    conn.execute(
+        'INSERT INTO expenses (name, amount, category) VALUES (?, ?, ?)',
+        (data['name'], data['amount'], data['category'])
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({'message': 'Expense added'}), 201
 
 @app.route('/expenses/<int:expense_id>', methods=['DELETE'])
 def delete_expense(expense_id):
-    global expenses
-    expenses = [e for e in expenses if e['id'] != expense_id]
+    conn = get_db_connection()
+    conn.execute('DELETE FROM expenses WHERE id = ?', (expense_id,))
+    conn.commit()
+    conn.close()
     return '', 204
 
 if __name__ == '__main__':
